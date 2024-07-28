@@ -1,3 +1,4 @@
+#pragma once
 #include "linear/linear_layer.h"
 
 typedef int __layer_type;

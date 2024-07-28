@@ -1,3 +1,4 @@
+#pragma once
 #include "convolutional_filter.h"
 #include "image_structures.h"
 
@@ -7,7 +8,7 @@ typedef struct ConvolutionalLayer
 	int num_filters;
 } ConvolutionalLayer;
 
-ConvolutionalLayer *cnn_layer_alloc(int num_filters, int m, int n);
+ConvolutionalLayer *cnn_layer_alloc(int num_filters, int m, int n, int** indexes, int* num_indexes);
 
 void cnn_layer_free(ConvolutionalLayer* cnn_layer);
 
@@ -15,4 +16,4 @@ void cnn_layer_randomize_weights(ConvolutionalLayer* cnn_layer, __rng_dist_type 
 
 void cnn_layer_set_bias_zero(ConvolutionalLayer* cnn_layer);
 
-void cnn_layer_forward(ConvolutionalLayer* cnn_layer, ImageLayer* img_layer);
+void cnn_layer_forward(ConvolutionalLayer* cnn_layer, ImageLayer* input, ImageLayer* output);
