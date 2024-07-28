@@ -15,18 +15,4 @@ void cnn_layer_randomize_weights(ConvolutionalLayer* cnn_layer, __rng_dist_type 
 
 void cnn_layer_set_bias_zero(ConvolutionalLayer* cnn_layer);
 
-typedef struct GreyScale
-{
-	double *white;
-	int m;
-	int n;
-} GreyScale;
-
-typedef struct Image
-{
-	double *R;
-	double *G;
-	double *B;
-	int m;
-	int n;
-} Image;
+void cnn_layer_forward(ConvolutionalLayer* cnn_layer, ImageLayer* img_layer);
