@@ -57,11 +57,11 @@ void test_cnn_forward(void)
 	INDEXES[1][0] = 0;
 	INDEXES[1][1] = 1;
 	INDEXES[1][2] = 2;
-	ConvolutionalLayer* cnn_layer = cnn_layer_alloc(NUM_FILTERS, INPUT_M, INPUT_N, INDEXES, NUM_INDEXES);
+	__activation_type ACT_TYPE = ACT_RELU;
+	ConvolutionalLayer* cnn_layer = cnn_layer_alloc(INPUT_NUM_IMG, INPUT_M, INPUT_N, NUM_FILTERS, FILTER_M, FILTER_N, INDEXES, NUM_INDEXES, ACT_TYPE);
 	cnn_layer_randomize_weights(cnn_layer, RNG_HE);
 	cnn_layer_set_bias_zero(cnn_layer);
 	ImageLayer* input = img_layer_alloc(INPUT_NUM_IMG, INPUT_M, INPUT_N);
-	ImageLayer* output = img_layer_alloc(NUM_FILTERS, OUTPUT_M, OUTPUT_N);
 	input->images[0]->pixels[0] = 1;
 	input->images[0]->pixels[1] = 1;
 	input->images[0]->pixels[2] = 1;
@@ -110,17 +110,23 @@ void test_cnn_forward(void)
 	input->images[2]->pixels[13] = 1;
 	input->images[2]->pixels[14] = 1;
 	input->images[2]->pixels[15] = 1;
+	ConvolutionalLayerEvaluation* cnn_layer_eval = cnn_layer_eval_alloc(cnn_layer);
+	ConvolutionalLayerGrad* cnn_layer_grad = cnn_layer_grad_alloc(cnn_layer);
+	ImageLayer* grad_loss_out = img_layer_alloc(NUM_FILTERS, OUTPUT_M, OUTPUT_N);
 
 	for (int i = 0; i < 1000; ++i)
 	{
-		cnn_layer_forward(cnn_layer, input, output);
+		cnn_layer_eval_compute(cnn_layer_eval, cnn_layer, input);
+		cnn_layer_grad_compute(cnn_layer_grad, cnn_layer, cnn_layer_eval, input, grad_loss_out);
 	}
 
 	free(NUM_INDEXES);
 	free(INDEXES[0]);
 	free(INDEXES[1]);
 	free(INDEXES);
+	img_layer_free(grad_loss_out);
+	cnn_layer_eval_free(cnn_layer_eval);
+	cnn_layer_grad_free(cnn_layer_grad);
 	cnn_layer_free(cnn_layer);
 	img_layer_free(input);
-	img_layer_free(output);
 }

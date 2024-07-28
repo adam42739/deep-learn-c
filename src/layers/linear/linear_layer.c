@@ -118,10 +118,10 @@ void linlay_grad_compute_input(LinearLayerGrad *linlay_grad, LinearLayer *linlay
 {
 	for (int i = 0; i < linlay->linmods[0]->num_weights; ++i)
 	{
-		grad_loss_output[i] = 0;
+		linlay_grad->grad_loss_input[i] = 0;
 		for (int j = 0; j < linlay->num_linmods; ++j)
 		{
-			grad_loss_output[i] += linlay_grad->linmod_grads[j]->grad_loss_input[i];
+			linlay_grad->grad_loss_input[i] += linlay_grad->linmod_grads[j]->grad_loss_input[i];
 		}
 	}
 }
