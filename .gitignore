@@ -5,3 +5,5 @@ build/
 .idea/
 CMakeSettings.json
 .vscode
+src/main.dSYM
+src/main
