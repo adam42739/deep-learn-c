@@ -18,6 +18,8 @@ void img_array_product(ImageArray* img_array_A, ImageArray* img_array_B, ImageAr
 
 void img_array_copy(ImageArray* source, ImageArray* dest);
 
+void img_array_set(ImageArray* img_array, double val);
+
 typedef struct ImageLayer
 {
 	ImageArray** img_arrays;
