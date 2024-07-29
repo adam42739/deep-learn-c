@@ -1,32 +1,48 @@
-#pragma once
-#include "../linear/linear_layer.h"
-#include "image_structures.h"
+#include "img_structures.h"
+#include "img_activation.h"
+#include "../../general_lib/random.h"
 
 typedef struct ConvolutionalFilter
 {
-	LinearModel* linmod;
+	double** weights;
 	int filter_m;
 	int filter_n;
-	double bias;
-	int* img_array_indexes;
-	int num_indexes;
+	int input_index;
 } ConvolutionalFilter;
 
-ConvolutionalFilter* cnn_filter_alloc(int filter_m, int filter_n, int num_indexes, int* indexes);
+ConvolutionalFilter* cnn_filter_alloc(int filter_m, int filter_n, int input_index);
 
 void cnn_filter_free(ConvolutionalFilter* cnn_filter);
 
-void cnn_filter_randomize_weights(ConvolutionalFilter* cnn_filter, __rng_dist_type rng_dist);
+void cnn_filter_randomize_weights(ConvolutionalFilter* cnn_filter, double stdev);
 
-void cnn_filter_set_bias_zero(ConvolutionalFilter* cnn_filter);
-
-double cnn_filter_forward_at_index(ConvolutionalFilter* cnn_filter, ImageLayer* input, int i_i, int j_i);
+double cnn_filter_forward_dot_product(ConvolutionalFilter* cnn_filter, ImageArray* input, int i, int j);
 
 void cnn_filter_forward(ConvolutionalFilter* cnn_filter, ImageLayer* input, ImageArray* output);
 
+typedef struct ConvolutionFilterIndexGrad
+{
+	double** grad_prenet_weights;
+	double** grad_loss_weights;
+	double** grad_prenet_input;
+	double** grad_loss_input;
+	int index_i;
+	int index_j;
+} ConvolutionalFilterIndexGrad;
+
+ConvolutionalFilterIndexGrad* cnn_filteri_grad_alloc(ConvolutionalFilter* cnn_filter, int index_i, int index_j);
+
+void cnn_filteri_grad_free(ConvolutionalFilterIndexGrad* cnn_filteri_grad);
+
+void cnn_filteri_grad_compute_weights(ConvolutionalFilterIndexGrad* cnn_filteri_grad, ConvolutionalFilter* cnn_filter, ImageArray* input, ImageArray* grad_loss_prenet);
+
+void cnn_filteri_grad_compute_input(ConvolutionalFilterIndexGrad* cnn_filteri_grad, ConvolutionalFilter* cnn_filter, ImageArray* grad_loss_prenet);
+
+void cnn_filteri_grad_compute(ConvolutionalFilterIndexGrad* cnn_filteri_grad, ConvolutionalFilter* cnn_filter, ImageArray* input, ImageArray* grad_loss_prenet);
+
 typedef struct ConvolutionalFilterGrad
 {
-	LinearModelGrad** linmod_grads;
+	ConvolutionalFilterIndexGrad*** filteri_grads;
 	int output_m;
 	int output_n;
 } ConvolutionalFilterGrad;
@@ -35,10 +51,73 @@ ConvolutionalFilterGrad* cnn_filter_grad_alloc(ConvolutionalFilter* cnn_filter, 
 
 void cnn_filter_grad_free(ConvolutionalFilterGrad* cnn_filter_grad);
 
-void cnn_filter_grad_compute_weights(ConvolutionalFilterGrad* cnn_filter_grad, ConvolutionalFilter* cnn_filter, ImageLayer* input, ImageArray* grad_loss_net);
+void cnn_filter_grad_compute(ConvolutionalFilterGrad* cnn_filter_grad, ConvolutionalFilter* cnn_filter, ImageArray* input, ImageArray* grad_loss_prenet);
 
-void cnn_filter_grad_compute_bias(ConvolutionalFilterGrad* cnn_filter_grad, ConvolutionalFilter* cnn_filter, ImageLayer* input, ImageArray* grad_loss_net);
+typedef struct ConvolutionalMultiFilter
+{
+	ConvolutionalFilter** filters;
+	int num_filters;
+	int* filter_indexes;
+	int filter_m;
+	int filter_n;
+	int input_m;
+	int input_n;
+	int output_m;
+	int output_n;
+	double bias;
+	__img_activation_type act_type;
+} ConvolutionalMultiFilter;
 
-void cnn_filter_grad_compute_input(ConvolutionalFilterGrad* cnn_filter_grad, ConvolutionalFilter* cnn_filter, ImageLayer* input, ImageArray* grad_loss_net);
+ConvolutionalMultiFilter* cnn_mfilter_alloc(int num_filters, int* filter_indexes, int filter_m, int filter_n, int input_m, int input_n, __img_activation_type act_type);
 
-void cnn_filter_grad_compute(ConvolutionalFilterGrad* cnn_filter_grad, ConvolutionalFilter* cnn_filter, ImageLayer* input, ImageArray* grad_loss_net);
+void cnn_mfilter_free(ConvolutionalMultiFilter* cnn_mfilter);
+
+void cnn_mfilter_randomize_weights(ConvolutionalMultiFilter* cnn_filter, double stdev);
+
+void cnn_mfilter_set_bias_zero(ConvolutionalMultiFilter* cnn_mfilter);
+
+typedef struct ConvolutionMultiFilterEvaluation
+{
+	ImageArray** prenet;
+	int num_filters;
+	ImageArray* pre_activation;
+	ImageArray* output;
+	int m;
+	int n;
+} ConvolutionMultiFilterEvaluation;
+
+ConvolutionMultiFilterEvaluation* cnn_mfilter_eval_alloc(ConvolutionalMultiFilter* cnn_mfilter);
+
+void cnn_mfilter_eval_free(ConvolutionMultiFilterEvaluation* cnn_mfilter_eval);
+
+void cnn_mfilter_eval_compute(ConvolutionMultiFilterEvaluation* cnn_mfilter_eval, ConvolutionalMultiFilter* cnn_mfilter, ImageLayer* input);
+
+typedef struct ConvolutionalMultiFilterGrad
+{
+	ConvolutionalFilterGrad** filter_grads;
+	ImageArray** grad_net_prenet;
+	ImageArray** grad_loss_prenet;
+	ImageArray** grad_net_input;
+	ImageArray** grad_loss_input;
+	int num_filters;
+	ImageArray* grad_out_net;
+	ImageArray* grad_loss_net;
+	double grad_net_bias;
+	double grad_loss_bias;
+} ConvolutionalMultiFilterGrad;
+
+ConvolutionalMultiFilterGrad* cnn_mfilter_grad_alloc(ConvolutionalMultiFilter* cnn_mfilter);
+
+void cnn_mfilter_grad_free(ConvolutionalMultiFilterGrad* cnn_mfilter_grad);
+
+void cnn_mfilter_grad_compute_net(ConvolutionalMultiFilterGrad* cnn_mfilter_grad, ConvolutionalMultiFilter* cnn_mfilter, ConvolutionMultiFilterEvaluation* cnn_mfilter_eval, ImageArray* grad_loss_out);
+
+void cnn_mfilter_grad_compute_bias(ConvolutionalMultiFilterGrad* cnn_mfilter_grad);
+
+void cnn_mfilter_grad_compute_prenet(ConvolutionalMultiFilterGrad* cnn_mfilter_grad, ConvolutionalMultiFilter* cnn_mfilter);
+
+void cnn_mfilter_grad_compute_filters(ConvolutionalMultiFilterGrad* cnn_mfilter_grad, ConvolutionalMultiFilter* cnn_mfilter, ImageArray* input);
+
+void cnn_mfilter_grad_compute_input(ConvolutionalMultiFilterGrad* cnn_mfilter_grad);
+
+void cnn_mfilter_grad_compute(ConvolutionalMultiFilterGrad* cnn_mfilter_grad, ConvolutionalMultiFilter* cnn_mfilter, ImageArray* input, ImageArray* grad_loss_out);

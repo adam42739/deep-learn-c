@@ -14,11 +14,11 @@ void linmod_free(LinearModel* linmod)
 	free(linmod);
 }
 
-void linmod_randomize_weights(LinearModel* linmod, __rng_dist_type rng_type)
+void linmod_randomize_weights(LinearModel* linmod, double stdev)
 {
 	for (int i = 0; i < linmod->num_weights; ++i)
 	{
-		linmod->weights[i] = _rng_dist(rng_type, linmod->num_weights);
+		linmod->weights[i] = _rng_normal(0, stdev);
 	}
 }
 

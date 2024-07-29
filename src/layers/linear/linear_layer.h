@@ -1,19 +1,19 @@
 #pragma once
 #include "linear_model.h"
-#include "../../general_ml/activation.h"
+#include "linear_activation.h"
 
 typedef struct LinearLayer
 {
 	LinearModel **linmods;
 	int num_linmods;
-	__activation_type act_type;
+	__linear_activation_type act_type;
 } LinearLayer;
 
-LinearLayer *linlay_alloc(int input_size, int num_linmods, __activation_type act_type);
+LinearLayer *linlay_alloc(int input_size, int num_linmods, __linear_activation_type act_type);
 
 void linlay_free(LinearLayer *linlay);
 
-void linlay_randomize_weights(LinearLayer *linlay, __activation_type rng_type);
+void linlay_randomize_weights(LinearLayer *linlay, double stdev);
 
 void linlay_set_bias_zero(LinearLayer *linlay);
 

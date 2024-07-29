@@ -16,15 +16,16 @@ set(CDEEPLEARN_SRC ${CDEEPLEARN_SRC}
 	tests/tests.c
 	src/general_lib/stdlib_mod.c
 	src/general_lib/random.c
-	src/general_ml/activation.c
 	src/general_ml/loss.c
 	src/layers/convolutional/convolutional_filter.c
 	src/layers/convolutional/convolutional_layer.c
-	src/layers/convolutional/image_structures.c
+	src/layers/convolutional/img_activation.c
+	src/layers/convolutional/img_structures.c
+	src/layers/linear/linear_activation.c
 	src/layers/linear/linear_layer.c
 	src/layers/linear/linear_model.c
 	src/layers/layer.c
 	src/linear_network.c
 	src/vanilla_sgd.c
 )
-add_executable(deeplearnc ${CDEEPLEARN_SRC} )
+add_executable(deeplearnc ${CDEEPLEARN_SRC})

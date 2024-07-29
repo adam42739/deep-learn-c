@@ -13,7 +13,7 @@ LinearModel* linmod_alloc(int num_weights);
 
 void linmod_free(LinearModel* linmod);
 
-void linmod_randomize_weights(LinearModel* linmod, __rng_dist_type rng_type);
+void linmod_randomize_weights(LinearModel* linmod, double stdev);
 
 void linmod_set_bias_zero(LinearModel* linmod);
 
