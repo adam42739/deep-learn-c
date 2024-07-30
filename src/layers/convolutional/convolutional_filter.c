@@ -1,4 +1,5 @@
 #include "convolutional_filter.h"
+#include <stdio.h>
 
 ConvolutionalFilter* cnn_filter_alloc(int filter_m, int filter_n, int input_index)
 {
@@ -157,6 +158,10 @@ ConvolutionalFilterGrad* cnn_filter_grad_alloc(ConvolutionalFilter* cnn_filter, 
 	}
 	cnn_filter_grad->output_m = output_m;
 	cnn_filter_grad->output_n = output_n;
+	cnn_filter_grad->input_m = output_m + cnn_filter->filter_m - 1;
+	cnn_filter_grad->input_n = output_n + cnn_filter->filter_n - 1;
+	cnn_filter_grad->filter_m = cnn_filter->filter_m;
+	cnn_filter_grad->filter_n = cnn_filter->filter_n;
 	return cnn_filter_grad;
 }
 
@@ -240,9 +245,9 @@ void cnn_mfilter_set_bias_zero(ConvolutionalMultiFilter* cnn_mfilter)
 	cnn_mfilter->bias = 0;
 }
 
-ConvolutionMultiFilterEvaluation* cnn_mfilter_eval_alloc(ConvolutionalMultiFilter* cnn_mfilter)
+ConvolutionalMultiFilterEvaluation* cnn_mfilter_eval_alloc(ConvolutionalMultiFilter* cnn_mfilter, ImageArray* output)
 {
-	ConvolutionMultiFilterEvaluation* cnn_mfilter_eval = _mem_alloc(sizeof(ConvolutionMultiFilterEvaluation));
+	ConvolutionalMultiFilterEvaluation* cnn_mfilter_eval = _mem_alloc(sizeof(ConvolutionalMultiFilterEvaluation));
 	cnn_mfilter_eval->prenet = _mem_alloc(sizeof(ImageArray*) * cnn_mfilter->num_filters);
 	for (int i = 0; i < cnn_mfilter->num_filters; ++i)
 	{
@@ -250,13 +255,13 @@ ConvolutionMultiFilterEvaluation* cnn_mfilter_eval_alloc(ConvolutionalMultiFilte
 	}
 	cnn_mfilter_eval->num_filters = cnn_mfilter->num_filters;
 	cnn_mfilter_eval->pre_activation = img_array_alloc(cnn_mfilter->output_m, cnn_mfilter->output_n);
-	cnn_mfilter_eval->output = img_array_alloc(cnn_mfilter->output_m, cnn_mfilter->output_n);
+	cnn_mfilter_eval->output = output;
 	cnn_mfilter_eval->m = cnn_mfilter->output_m;
 	cnn_mfilter_eval->n = cnn_mfilter->output_n;
 	return cnn_mfilter_eval;
 }
 
-void cnn_mfilter_eval_free(ConvolutionMultiFilterEvaluation* cnn_mfilter_eval)
+void cnn_mfilter_eval_free(ConvolutionalMultiFilterEvaluation* cnn_mfilter_eval)
 {
 	for (int i = 0; i < cnn_mfilter_eval->num_filters; ++i)
 	{
@@ -264,12 +269,11 @@ void cnn_mfilter_eval_free(ConvolutionMultiFilterEvaluation* cnn_mfilter_eval)
 	}
 	free(cnn_mfilter_eval->prenet);
 	img_array_free(cnn_mfilter_eval->pre_activation);
-	img_array_free(cnn_mfilter_eval->output);
 	free(cnn_mfilter_eval);
 }
 
 void cnn_mfilter_eval_compute(
-	ConvolutionMultiFilterEvaluation* cnn_mfilter_eval,
+	ConvolutionalMultiFilterEvaluation* cnn_mfilter_eval,
 	ConvolutionalMultiFilter* cnn_mfilter,
 	ImageLayer* input)
 {
@@ -283,7 +287,7 @@ void cnn_mfilter_eval_compute(
 
 ConvolutionalMultiFilterGrad* cnn_mfilter_grad_alloc(ConvolutionalMultiFilter* cnn_mfilter)
 {
-	ConvolutionalMultiFilterGrad* cnn_mfilter_grad = _mem_alloc(sizeof(ConvolutionalFilterGrad));
+	ConvolutionalMultiFilterGrad* cnn_mfilter_grad = _mem_alloc(sizeof(ConvolutionalMultiFilterGrad));
 	cnn_mfilter_grad->grad_net_prenet = _mem_alloc(sizeof(ImageArray*) * cnn_mfilter->num_filters);
 	cnn_mfilter_grad->grad_loss_prenet = _mem_alloc(sizeof(ImageArray*) * cnn_mfilter->num_filters);
 	cnn_mfilter_grad->grad_loss_input = _mem_alloc(sizeof(ImageArray*) * cnn_mfilter->num_filters);
@@ -297,6 +301,10 @@ ConvolutionalMultiFilterGrad* cnn_mfilter_grad_alloc(ConvolutionalMultiFilter* c
 	cnn_mfilter_grad->grad_out_net = img_array_alloc(cnn_mfilter->output_m, cnn_mfilter->output_n);
 	cnn_mfilter_grad->grad_loss_net = img_array_alloc(cnn_mfilter->output_m, cnn_mfilter->output_n);
 	cnn_mfilter_grad->grad_loss_bias = img_array_alloc(cnn_mfilter->output_m, cnn_mfilter->output_n);
+	cnn_mfilter_grad->input_m = cnn_mfilter->input_m;
+	cnn_mfilter_grad->input_n = cnn_mfilter->input_n;
+	cnn_mfilter_grad->output_m = cnn_mfilter->output_m;
+	cnn_mfilter_grad->output_n = cnn_mfilter->output_n;
 	return cnn_mfilter_grad;
 }
 
@@ -320,7 +328,7 @@ void cnn_mfilter_grad_free(ConvolutionalMultiFilterGrad* cnn_mfilter_grad)
 void cnn_mfilter_grad_compute_net(
 	ConvolutionalMultiFilterGrad* cnn_mfilter_grad,
 	ConvolutionalMultiFilter* cnn_mfilter,
-	ConvolutionMultiFilterEvaluation* cnn_mfilter_eval,
+	ConvolutionalMultiFilterEvaluation* cnn_mfilter_eval,
 	ImageArray* grad_loss_out)
 {
 	_img_activation_deriv(cnn_mfilter_eval->pre_activation, cnn_mfilter_eval->output, cnn_mfilter_grad->grad_out_net, cnn_mfilter->act_type);
@@ -353,23 +361,22 @@ void cnn_mfilter_grad_compute_filters(
 void cnn_mfilter_grad_compute_input_at_index(
 	ImageArray* grad_loss_input,
 	ConvolutionalFilterGrad* cnn_filter_grad,
-	ConvolutionalMultiFilter* cnn_mfilter,
 	int input_i,
 	int input_j)
 {
 	grad_loss_input->pixels[input_i][input_j] = 0;
-	int start_output_i = input_i - (cnn_mfilter->output_m - 1);
+	int start_output_i = input_i - (cnn_filter_grad->output_m - 1);
 	int end_output_i = input_i;
-	int start_output_j = input_j - (cnn_mfilter->output_n - 1);
+	int start_output_j = input_j - (cnn_filter_grad->output_n - 1);
 	int end_output_j = input_j;
-	int weight_i = cnn_mfilter->filter_m - 1;
+	int weight_i = cnn_filter_grad->filter_m - 1;
 	for (int output_i = start_output_i; output_i < end_output_i; ++output_i)
 	{
-		int weight_j = cnn_mfilter->filter_n - 1;
+		int weight_j = cnn_filter_grad->filter_n - 1;
 		for (int output_j = start_output_j; output_j < end_output_j; ++output_j)
 		{
-			__boolean valid_i = output_i >= 0 && output_i < cnn_mfilter->output_m;
-			__boolean valid_j = output_j >= 0 && output_j < cnn_mfilter->output_n;
+			__boolean valid_i = output_i >= 0 && output_i < cnn_filter_grad->output_m;
+			__boolean valid_j = output_j >= 0 && output_j < cnn_filter_grad->output_n;
 			if (valid_i && valid_j)
 			{
 				grad_loss_input->pixels[input_i][input_j] += cnn_filter_grad->filteri_grads[output_i][output_j]->grad_loss_input[weight_i][weight_j];
@@ -380,29 +387,29 @@ void cnn_mfilter_grad_compute_input_at_index(
 	}
 }
 
-void cnn_mfilter_grad_compute_input_prenet(ImageArray* grad_loss_input, ConvolutionalFilterGrad* cnn_filter_grad, ConvolutionalMultiFilter* cnn_mfilter)
+void cnn_mfilter_grad_compute_input_prenet(ImageArray* grad_loss_input, ConvolutionalFilterGrad* cnn_filter_grad)
 {
-	for (int i = 0; i < cnn_mfilter->input_m; ++i)
+	for (int i = 0; i < cnn_filter_grad->input_m; ++i)
 	{
-		for (int j = 0; j < cnn_mfilter->input_n; ++j)
+		for (int j = 0; j < cnn_filter_grad->input_n; ++j)
 		{
-			cnn_mfilter_grad_compute_input_at_index(grad_loss_input, cnn_filter_grad, cnn_mfilter, i, j);
+			cnn_mfilter_grad_compute_input_at_index(grad_loss_input, cnn_filter_grad, i, j);
 		}
 	}
 }
 
-void cnn_mfilter_grad_compute_input(ConvolutionalMultiFilterGrad* cnn_mfilter_grad, ConvolutionalMultiFilter* cnn_mfilter)
+void cnn_mfilter_grad_compute_input(ConvolutionalMultiFilterGrad* cnn_mfilter_grad)
 {
 	for (int i = 0; i < cnn_mfilter_grad->filter_grads; ++i)
 	{
-		cnn_mfilter_grad_compute_input_prenet(cnn_mfilter_grad->grad_loss_input[i], cnn_mfilter_grad->filter_grads[i], cnn_mfilter);
+		cnn_mfilter_grad_compute_input_prenet(cnn_mfilter_grad->grad_loss_input[i], cnn_mfilter_grad->filter_grads[i]);
 	}
 }
 
 void cnn_mfilter_grad_compute(
 	ConvolutionalMultiFilterGrad* cnn_mfilter_grad,
 	ConvolutionalMultiFilter* cnn_mfilter,
-	ConvolutionMultiFilterEvaluation* cnn_mfilter_eval,
+	ConvolutionalMultiFilterEvaluation* cnn_mfilter_eval,
 	ImageArray* input,
 	ImageArray* grad_loss_out)
 {
@@ -410,5 +417,5 @@ void cnn_mfilter_grad_compute(
 	cnn_mfilter_grad_compute_bias(cnn_mfilter_grad);
 	cnn_mfilter_grad_compute_prenet(cnn_mfilter_grad);
 	cnn_mfilter_grad_compute_filters(cnn_mfilter_grad, cnn_mfilter, input);
-	cnn_mfilter_grad_compute_input(cnn_mfilter_grad, cnn_mfilter);
+	cnn_mfilter_grad_compute_input(cnn_mfilter_grad);
 }

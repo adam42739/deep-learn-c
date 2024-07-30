@@ -9,3 +9,5 @@
 void test_linear_sgd(void);
 
 void test_cnn_forward(void);
+
+void test_cnn_alloc_dealloc(void);

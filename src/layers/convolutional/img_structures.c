@@ -63,7 +63,7 @@ ImageLayer *img_layer_alloc(int num_arrays, int m, int n)
 	img_layer->img_arrays = _mem_alloc(sizeof(ImageArray *) * num_arrays);
 	for (int i = 0; i < num_arrays; ++i)
 	{
-		img_layer->img_arrays = img_array_alloc(m, n);
+		img_layer->img_arrays[i] = img_array_alloc(m, n);
 	}
 	img_layer->num_arrays = num_arrays;
 	img_layer->m = m;
