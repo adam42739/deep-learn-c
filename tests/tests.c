@@ -158,15 +158,25 @@ void test_cnn_alloc_dealloc(void)
 	ConvolutionalLayer* cnn_layer = cnn_layer_alloc(NUM_INPUT_IMG, FILTER_M, FILTER_N, INPUT_M, INPUT_N, NUM_FITLER, NUM_FILTER_INDEX, FILTER_INDEX, IMG_ACT_RELU);
 	cnn_layer_randomize_weights(cnn_layer, 1.0);
 	cnn_layer_set_bias_zero(cnn_layer);
-	ConvolutionalLayerEvaluation* cnn_layer_eval = cnn_layer_eval_alloc(cnn_layer);
-	ConvolutionalLayerGrad* cnn_layer_grad = cnn_layer_grad_alloc(cnn_layer);
+	ConvolutionalLayerSGD* cnn_layer_sgd = cnn_layer_sgd_alloc(cnn_layer);
+	ImageLayer* input = img_layer_alloc(NUM_INPUT_IMG, INPUT_M, INPUT_N);
+	ImageLayer* grad_loss_out = img_layer_alloc(NUM_FITLER, INPUT_M - FILTER_M + 1, INPUT_N - FILTER_N + 1);
 
-	cnn_layer_grad_free(cnn_layer_grad);
-	cnn_layer_eval_free(cnn_layer_eval);
+	for (int i = 0; i < 10; ++i)
+	{
+		printf("%d\n", i);
+		cnn_layer_sgd_forward(cnn_layer_sgd, input);
+		cnn_layer_sgd_backward(cnn_layer_sgd, input, grad_loss_out, 0.01);
+	}
+
+	img_layer_free(input);
+	img_layer_free(grad_loss_out);
+	cnn_layer_sgd_free(cnn_layer_sgd);
 	cnn_layer_free(cnn_layer);
 	free(FILTER_INDEX[0]);
 	free(FILTER_INDEX[1]);
 	free(FILTER_INDEX[2]);
 	free(FILTER_INDEX);
 	free(NUM_FILTER_INDEX);
+	int a = 0;
 }

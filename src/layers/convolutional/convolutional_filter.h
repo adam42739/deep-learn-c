@@ -157,7 +157,7 @@ void cnn_mfilter_grad_compute_prenet(ConvolutionalMultiFilterGrad* cnn_mfilter_g
 void cnn_mfilter_grad_compute_filters(
 	ConvolutionalMultiFilterGrad* cnn_mfilter_grad,
 	ConvolutionalMultiFilter* cnn_mfilter,
-	ImageArray* input);
+	ImageLayer* input);
 
 void cnn_mfilter_grad_compute_input_at_index(
 	ImageArray* grad_loss_input,
@@ -173,5 +173,5 @@ void cnn_mfilter_grad_compute(
 	ConvolutionalMultiFilterGrad* cnn_mfilter_grad,
 	ConvolutionalMultiFilter* cnn_mfilter,
 	ConvolutionalMultiFilterEvaluation* cnn_mfilter_eval,
-	ImageArray* input,
+	ImageLayer* input,
 	ImageArray* grad_loss_out);

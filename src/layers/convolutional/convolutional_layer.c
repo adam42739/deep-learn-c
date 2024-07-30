@@ -71,7 +71,7 @@ void cnn_layer_eval_free(ConvolutionalLayerEvaluation *cnn_layer_eval)
 	img_layer_free(cnn_layer_eval->output);
 	for (int i = 0; i < cnn_layer_eval->num_filters; ++i)
 	{
-		cnn_mfilter_free(cnn_layer_eval->filter_evals[i]);
+		cnn_mfilter_eval_free(cnn_layer_eval->filter_evals[i]);
 	}
 	free(cnn_layer_eval->filter_evals);
 	free(cnn_layer_eval);
@@ -79,7 +79,7 @@ void cnn_layer_eval_free(ConvolutionalLayerEvaluation *cnn_layer_eval)
 
 void cnn_layer_eval_compute(ConvolutionalLayer *cnn_layer, ImageLayer *input, ConvolutionalLayerEvaluation *cnn_layer_eval)
 {
-	for (int i = 0; i < cnn_layer->filters; ++i)
+	for (int i = 0; i < cnn_layer->num_filters; ++i)
 	{
 		cnn_mfilter_eval_compute(cnn_layer_eval->filter_evals[i], cnn_layer->filters[i], input);
 	}
@@ -98,7 +98,6 @@ ConvolutionalLayerGrad *cnn_layer_grad_alloc(ConvolutionalLayer *cnn_layer)
 	for (int i = 0; i < cnn_layer->num_filters; ++i)
 	{
 		cnn_layer_grad->filter_grads[i] = cnn_mfilter_grad_alloc(cnn_layer->filters[i]);
-		int a = 0;
 	}
 	cnn_layer_grad->grad_loss_input = img_layer_alloc(cnn_layer->num_input_img, cnn_layer->input_m, cnn_layer->input_n);
 	return cnn_layer_grad;

@@ -1,3 +1,4 @@
+#pragma once
 #include "convolutional_filter.h"
 
 typedef struct ConvolutionalLayer

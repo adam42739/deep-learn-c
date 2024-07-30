@@ -24,10 +24,10 @@ typedef struct ConvolutionalLayerSGD
 	ConvolutionalLayerGrad* grad;
 } ConvolutionalLayerSGD;
 
-ConvolutionalLayerSGD* cnnlay_sgd_alloc(ConvolutionalLayer* cnn_layer);
+ConvolutionalLayerSGD* cnn_layer_sgd_alloc(ConvolutionalLayer* cnn_layer);
 
-void cnnlay_sgd_free(ConvolutionalLayerSGD* cnnlay_sgd);
+void cnn_layer_sgd_free(ConvolutionalLayerSGD* cnn_layer_sgd);
 
-void cnnlay_sgd_forward(ConvolutionalLayerSGD* cnnlay_sgd, ImageLayer* input);
+void cnn_layer_sgd_forward(ConvolutionalLayerSGD* cnn_layer_sgd, ImageLayer* input);
 
-void cnnlay_sgd_backward(ConvolutionalLayerSGD* cnnlay_sgd, ImageLayer* input, ImageLayer* grad_loss_out, double step);
+void cnn_layer_sgd_backward(ConvolutionalLayerSGD* cnn_layer_sgd, ImageLayer* input, ImageLayer* grad_loss_out, double step);
