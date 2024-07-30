@@ -36,3 +36,28 @@ void linlay_sgd_backward(LinearLayerSGD *linlay_sgd, double *input, double *grad
 		}
 	}
 }
+
+ConvolutionalLayerSGD *cnnlay_sgd_alloc(ConvolutionalLayer *cnn_layer)
+{
+	ConvolutionalLayerSGD *cnnlay_sgd = _mem_alloc(sizeof(ConvolutionalLayerSGD));
+	cnnlay_sgd->layer = cnn_layer;
+	cnnlay_sgd->eval = cnn_layer_eval_alloc(cnn_layer);
+	cnnlay_sgd->grad = cnn_layer_grad_alloc(cnn_layer);
+	return cnnlay_sgd;
+}
+
+void cnnlay_sgd_free(ConvolutionalLayerSGD *cnnlay_sgd)
+{
+	cnn_layer_eval_free(cnnlay_sgd->eval);
+	cnn_layer_grad_free(cnnlay_sgd->grad);
+	free(cnnlay_sgd);
+}
+
+void cnnlay_sgd_forward(ConvolutionalLayerSGD *cnnlay_sgd, ImageLayer *input)
+{
+	cnn_layer_eval_compute(cnnlay_sgd->layer, input, cnnlay_sgd->eval);
+}
+
+void cnnlay_sgd_backward(ConvolutionalLayerSGD *cnnlay_sgd, ImageLayer *input, ImageLayer *grad_loss_out, double step)
+{
+}

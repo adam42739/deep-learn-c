@@ -40,7 +40,7 @@ ConvolutionalLayerEvaluation* cnn_layer_eval_alloc(ConvolutionalLayer* cnn_layer
 
 void cnn_layer_eval_free(ConvolutionalLayerEvaluation* cnn_layer_eval);
 
-void cnn_layer_forward(ConvolutionalLayer* cnn_layer, ImageLayer* input, ConvolutionalLayerEvaluation* cnn_layer_eval);
+void cnn_layer_eval_compute(ConvolutionalLayer* cnn_layer, ImageLayer* input, ConvolutionalLayerEvaluation* cnn_layer_eval);
 
 typedef struct ConvolutionalLayerGrad
 {
