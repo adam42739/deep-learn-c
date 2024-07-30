@@ -60,4 +60,8 @@ void cnnlay_sgd_forward(ConvolutionalLayerSGD *cnnlay_sgd, ImageLayer *input)
 
 void cnnlay_sgd_backward(ConvolutionalLayerSGD *cnnlay_sgd, ImageLayer *input, ImageLayer *grad_loss_out, double step)
 {
+	cnn_layer_grad_compute(cnnlay_sgd->grad, cnnlay_sgd->eval, cnnlay_sgd->layer, input, grad_loss_out);
+	for (int i = 0; i < cnnlay_sgd->layer->num_filters; ++i) {
+		// TODO
+	}
 }

@@ -165,9 +165,9 @@ void cnn_mfilter_grad_compute_input_at_index(
 	int input_i,
 	int input_j);
 
-void cnn_mfilter_grad_compute_input_prenet(ImageArray* grad_loss_input, ConvolutionalFilterGrad* cnn_filter_grad, ConvolutionalMultiFilter* cnn_mfilter);
+void cnn_mfilter_grad_compute_input_prenet(ImageArray* grad_loss_input, ConvolutionalFilterGrad* cnn_filter_grad);
 
-void cnn_mfilter_grad_compute_input(ConvolutionalMultiFilterGrad* cnn_mfilter_grad, ConvolutionalMultiFilter* cnn_mfilter);
+void cnn_mfilter_grad_compute_input(ConvolutionalMultiFilterGrad* cnn_mfilter_grad);
 
 void cnn_mfilter_grad_compute(
 	ConvolutionalMultiFilterGrad* cnn_mfilter_grad,

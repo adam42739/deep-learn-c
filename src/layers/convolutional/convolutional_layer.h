@@ -51,11 +51,14 @@ typedef struct ConvolutionalLayerGrad
 	int num_input_img;
 	int num_filters;
 	ConvolutionalMultiFilterGrad** filter_grads;
+	ImageLayer* grad_loss_input;
 } ConvolutionalLayerGrad;
 
 ConvolutionalLayerGrad* cnn_layer_grad_alloc(ConvolutionalLayer* cnn_layer);
 
 void cnn_layer_grad_free(ConvolutionalLayerGrad* cnn_layer_grad);
+
+void cnn_layer_grad_compute_input(ConvolutionalLayerGrad *cnn_layer_grad, ConvolutionalLayer *cnn_layer);
 
 void cnn_layer_grad_compute(
 	ConvolutionalLayerGrad* cnn_layer_grad,

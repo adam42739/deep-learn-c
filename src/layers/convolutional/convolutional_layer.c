@@ -100,6 +100,7 @@ ConvolutionalLayerGrad *cnn_layer_grad_alloc(ConvolutionalLayer *cnn_layer)
 		cnn_layer_grad->filter_grads[i] = cnn_mfilter_grad_alloc(cnn_layer->filters[i]);
 		int a = 0;
 	}
+	cnn_layer_grad->grad_loss_input = img_layer_alloc(cnn_layer->num_input_img, cnn_layer->input_m, cnn_layer->input_n);
 	return cnn_layer_grad;
 }
 
@@ -110,7 +111,16 @@ void cnn_layer_grad_free(ConvolutionalLayerGrad *cnn_layer_grad)
 		cnn_mfilter_grad_free(cnn_layer_grad->filter_grads[i]);
 	}
 	free(cnn_layer_grad->filter_grads);
+	img_layer_free(cnn_layer_grad->grad_loss_input);
 	free(cnn_layer_grad);
+}
+
+void cnn_layer_grad_compute_input(ConvolutionalLayerGrad *cnn_layer_grad, ConvolutionalLayer *cnn_layer)
+{
+	for (int i = 0; i < cnn_layer->num_filters; ++i)
+	{
+		
+	}
 }
 
 void cnn_layer_grad_compute(
@@ -124,4 +134,5 @@ void cnn_layer_grad_compute(
 	{
 		cnn_mfilter_grad_compute(cnn_layer_grad->filter_grads[i], cnn_layer->filters[i], cnn_layer_eval->filter_evals[i], input, grad_loss_out->img_arrays[i]);
 	}
+	cnn_layer_grad_compute_input(cnn_layer_grad, cnn_layer);
 }
