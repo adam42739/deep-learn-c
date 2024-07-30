@@ -8,5 +8,6 @@ typedef int __boolean;
 #define TRUE 1
 
 #define MAX(X, Y) (X > Y ? X : Y)
+#define MIN(X, Y) (X <= Y ? X : Y)
 
 void* _mem_alloc(int size);
