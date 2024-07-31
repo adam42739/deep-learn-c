@@ -21,6 +21,7 @@ set(CDEEPLEARN_SRC ${CDEEPLEARN_SRC}
 	src/layers/convolutional/convolutional_layer.c
 	src/layers/convolutional/img_activation.c
 	src/layers/convolutional/img_structures.c
+	src/layers/pooling/pooling_layer.c
 	src/layers/linear/linear_activation.c
 	src/layers/linear/linear_layer.c
 	src/layers/linear/linear_model.c

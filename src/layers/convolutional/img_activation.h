@@ -3,7 +3,7 @@
 typedef int __img_activation_type;
 
 #define IMG_ACT_IDENTITY 0
-#define IMG_ACT_RELU 0
+#define IMG_ACT_RELU 1
 
 void _img_activation(ImageArray* pre_activation, ImageArray* output, __img_activation_type act_type);
 
